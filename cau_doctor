@@ -1,0 +1,188 @@
+import requests
+from bs4 import BeautifulSoup
+import mysql.connector
+import time
+from selenium import webdriver
+from urllib.request import urlopen
+from mysql.connector import MySQLConnection
+# conn1=mysql.connector.connect(
+#     host="localhost",
+#     user="root",
+#     passwd="rudgmleo12**",
+#     database="cau_doctor",
+    
+# )
+# conn2=mysql.connector.connect(
+#     host="localhost",
+#     user="root",
+#     passwd="rudgmleo12**",
+#     database="cau_scholar",
+    
+# )
+conn3=mysql.connector.connect(
+    host="localhost",
+    user="root",
+    passwd="rudgmleo12**",
+    database="cau_academy",
+    
+)
+driver=webdriver.Chrome(r"C:\Users\gsafe\Downloads\chromedriver_win32 (1)\chromedriver.exe")
+department=['순환기내과','흉부외과']
+#department = ['순환기내과', '심장내과', '심장외과', '흉부외과', '심장혈관외과', '소아심장과']
+url="https://ch.cauhs.or.kr/medical/medical.asp?cat_no=02010000"
+driver.get(url)
+departmentLink=[]
+doctor_click=[]
+doctorLink=[]
+names=[]
+belong=[]
+major=[]
+education=[]
+career=[]
+link=[]
+pname=[]
+data=[]
+aname=[]
+
+time.sleep(1)
+case=1
+k=0
+j=0
+s=0
+b=[]
+#d1=driver.find_element_by_css_selector("#ganada > ul > li:nth-child(36) > a").click()
+data.append(driver.find_element_by_xpath('/html/body/div/div[4]/div[2]/div[3]/div/div[1]/ul/li[14]/a'))
+data.append(driver.find_element_by_xpath('/html/body/div/div[4]/div[2]/div[3]/div/div[1]/ul/li[36]/a'))
+
+
+   
+for a in data:
+    departmentLink.append(a.get_attribute("href"))
+print(departmentLink)
+for i in departmentLink:
+    driver.get(i)
+    time.sleep(1)
+    buttons=driver.find_elements_by_xpath('//*[@id="content"]/div/div/div[3]/ul/li/div[1]/a')
+    
+    print(len(buttons))
+    for m in buttons:
+        # doctor_click=driver.find_elements_by_class_name('btn_dProfile')
+        # for i in doctor_click:
+            m.click()
+            driver.switch_to_window(driver.window_handles[1])
+            time.sleep(2)
+            # html=urlopen(driver.current_url)
+            # soup=BeautifulSoup(html,'html.parser')
+            # print(driver.current_url)
+            #이름
+            names.append(driver.find_element_by_css_selector('body > div > div.doc_content_wrap > div > div.doctor_txt > div.tit_area.fix > p.doctor_name'))
+            names[k]=names[k].text
+            print(names[k])
+            #전공
+            # major.append(driver.find_element_by_css_selector('body > div > div.doc_content_wrap > div > div.doctor_txt > div.tit_area.fix > p.doctor_part'))
+            major.append(driver.find_element_by_css_selector('body > div > div.doc_content_wrap > div > div.doctor_txt > p.doctor_explain'))
+            major[k]=major[k].text
+            print(major[k])
+           
+            k=k+1
+            #학력
+            try:
+                education.append(driver.find_element_by_css_selector('body > div > div.doc_content_wrap > ul.tab_con > li.tab_con1 > div > ul:nth-child(4)'))
+                education[j]=education[j].text.replace('\n','/')
+                print(education[j])
+            except:
+                education=[]
+            # print(career[j].text)
+            #경력
+            try:
+                career.append(driver.find_element_by_css_selector('body > div > div.doc_content_wrap > ul.tab_con > li.tab_con1 > div > ul:nth-child(6)'))
+                career[j]=career[j].text.replace('\n','/')
+                print(career[j])
+            except:
+                career=[]
+            try:
+                link.append(driver.current_url)
+                print(link[j])
+            except:
+                link=[]
+            
+            
+            time.sleep(2)
+            #학회
+            pclick=driver.find_element_by_css_selector('#tab2 > a').click()
+            time.sleep(2)
+            print(driver.window_handles)
+            driver.switch_to_window(driver.window_handles[1])
+
+            print(driver.current_url)
+            try:
+                if(len(driver.find_elements_by_css_selector(' body > div > div.doc_content_wrap > ul.tab_con > li.tab_con2 > div > h3:nth-child(3)'))==0):
+                    aname=[]
+
+                    
+                else:
+                    aname=driver.find_elements_by_css_selector('body > div > div.doc_content_wrap > ul.tab_con > li.tab_con2 > div > ul:nth-child(2)>li')
+                    
+                    print(len(aname))
+                    
+                    for i in range(len(aname)):
+                        aname[i]=aname[i].text
+                        print(aname[i])
+                
+            
+            except:
+                aname=[]
+            b.append([])
+            for i in range(len(aname)):
+            # print(aname[i])
+                print(type(b))
+                b[s].append(aname[i])
+    
+            print(b[s])
+            s=s+1
+           
+            #신승용,홍준화,박병준,김태호->논문정보가 가져와짐
+
+            driver.close()
+            driver.switch_to_window(driver.window_handles[-1])
+j=0
+k=0
+
+for i in range(len(names)):
+    belong.append("중앙대학교병원")
+print(len(names))
+print(len(belong))
+print(len(major))
+print(len(education))
+print(len(career))
+print(len(b))
+print(b)
+
+driver.close()
+
+# sql1="insert into cau_doctor(name, belong,major,education,career,link) values( %s,%s,%s,%s,%s,%s)"
+# cur1=conn1.cursor()
+# cur1.execute("CREATE TABLE cau_d(name text, belong text, major text, education text, career text, link text)")
+# for i in range(len(names)):
+#     cur1.execute(sql1,(names[i],belong[i], major[i],education[i],career[i],link[i]))
+# conn1.commit()
+
+# sql2="insert into cau_s(name, belong,pname) values (%s,%s,%s)"
+# cur2=conn2.cursor()
+# cur2.execute("CREATE TABLE cau_s(name text, belong text, pname text")
+# for i in range(len(names)):
+#     for j in range(len(pname[i])):
+#         # for k in range(0,len(pname[i]),2):
+#             cur2.execute(sql2,(names[i],belong[i],(pname[i])[k]))
+        
+
+# conn2.commit()
+
+sql3="insert into cbn_academy(name,belong,aname,year) values (%s,%s,%s,%s)"
+cur3=conn3.cursor()
+cur3.execute("CREATE TABLE cbn_academy(name mediumtext,belong mediumtext,aname mediumtext,year mediumtext)")
+for i in range(len(names)):
+    for j in range(len(b[i])):
+        cur3.execute(sql3,(names[i],belong[i],b[i][j],None))
+
+conn3.commit()
