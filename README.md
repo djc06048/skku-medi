@@ -1,2 +1,2 @@
 # mediaplus
-2021학년도 산학_메디아이플러스
+## SKKU 산학협력프로젝트 ### with Mediaplus
